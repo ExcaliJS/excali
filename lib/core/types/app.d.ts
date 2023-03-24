@@ -18,5 +18,21 @@ export enum HttpMethods {
   USE = 'USE',
 }
 
+export interface IServer {
+  AddRoute: (route : HttpMethods, path:string, exec: (...args:unknown[])=> unknown) => void;
+  AddMiddleware: ( exec: (...args:unknown[])=> unknown) => void;
+  AddStatic: (path:string, exec: (...args:unknown[])=> unknown) => void;
+  AddRedirect: (path:string, exec: (...args:unknown[])=> unknown) => void;
+  AddUse: (path:string, exec: (...args:unknown[])=> unknown) => void;
+  Start: (port:number) => void;
+  Stop: () => void;
+  GetRoutes: () => IRoute[];
+  GetMiddleware: () => IRoute[];
+  GetStatic: () => IRoute[];
+  GetRedirect: () => IRoute[];
+  GetUse: () => IRoute[];
+  GetServer: () => Http.Server;
+}
+
 
 
