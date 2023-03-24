@@ -43,4 +43,26 @@ export interface IRoute {
 }
 
 
+export interface IExcaliServer extends IServer  {
+  coreServer: Http.Server;
+  routes: IRoute[];
+  defaltError?: () => void;
+}
+
+export interface IExcaliServerOptions {
+  https?: {key : string, cert : string};
+  error?: {code : number, message : string};
+}
+
+export class RequestMessage extends Http.IncomingMessage {
+  query?: Record<string, string>;
+  body?: Record<string, string>;
+}
+
+export interface IUrlInfo {
+  Route: string | null;
+  Params: Record<string, string>;
+  body: Record<string, string>;
+}
+
 
