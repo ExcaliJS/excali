@@ -34,5 +34,13 @@ export interface IServer {
   GetServer: () => Http.Server;
 }
 
+export interface IRoute {
+  method : HttpMethods;
+  path: string;
+  handler: Function;
+  params: Iparams[];
+  Regexp: RegExp;
+}
+
 
 
