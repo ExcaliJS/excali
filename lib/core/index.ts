@@ -13,9 +13,7 @@ import {
 import * as Http from 'http';
 import { ExcaliCustomError } from "../error/handle";
 
-export class Router implements IRouterClass {
-
-   public servers: Record<number, IExcaliServer> = {}
+export class Core implements IRouterClass {
 
   public funcParams(func: Function, lowercase = false): Iparams[] {
     const funcString = func.toString();
@@ -178,4 +176,15 @@ export class Router implements IRouterClass {
   public urlParams(url: string, regexp: RegExp): Record<string, string> {
     return regexp.exec(url)?.groups ?? {};
   }
+  public getResponseCode: () => number = () => {
+
+    const code = this ? (this as Record<string, unknown>)?.statusCode : 200
+    if (this) (this as Record<string, unknown>).statusCode = 200
+    return code as number || 200
+  }
+
+  public setResponseCode = (code: number): void => {
+    if (this) (this as Record<string, unknown>).statusCode = code
+  }
+
 }

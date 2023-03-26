@@ -1,7 +1,7 @@
 
 import * as Http from 'http';
 import { ExcaliCustomError } from './handle';
-import { Router } from '../router';
+import { Router } from '../core/index';
 
 export const manageError = (res: Http.ServerResponse, err: ExcaliCustomError|Error|string): boolean =>{
     const router = new Router()

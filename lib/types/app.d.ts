@@ -64,19 +64,17 @@ export interface IExcaliServerOptions {
 }
 
 export class RequestMessage extends Http.IncomingMessage {
-  query?: Record<string, string>;
-  body?: Record<string, string>;
+  query?: Record<string, unknown>   
+  body?: Record<string, unknown> | string
 }
 
-export interface IUrlInfo 
-{
+export interface IUrlInfo {
     Route: string | null
     Parameters?: Record<string, unknown>
     Body?: Record<string, unknown>
 }
 
-export enum ExcaliError 
-{
+export enum ExcaliError {
     MISSING_PARAMETER = 'A parameter is missing : ',
     UNKNOW_PARAMETER = 'Unknown parameter : ',
     UNABLE_TO_READ_BODY = 'Unabled to read body'
