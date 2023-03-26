@@ -7,7 +7,7 @@ import { manageError } from "../error/manage";
 export class RequestParser {
   private servers: Record<number, IExcaliServer> = {};
 
-  constructor(private core: Core) {}
+  constructor(private core: Core) { }
 
   public async parser(port: number, req: http.IncomingMessage, res: http.ServerResponse): Promise<void> {
     const server = this.servers[port];
@@ -27,8 +27,8 @@ export class RequestParser {
 
     if (server) {
       for (const route of server.routes) {
-        const isPathValid = this.core.pathsCheck(urlInfo.Route, route, req.method);
-        
+        const isPathValid: PathResult = this.core.pathsCheck(urlInfo.Route, route, req.method);
+
         if (isPathValid === PathResult.Redirect) {
           await route.handler(req, res);
           return;
@@ -38,7 +38,7 @@ export class RequestParser {
           try {
             const params = requestMessageInfo.method === HttpMethods.GET ? urlInfo.Parameters : urlInfo.Body;
             const uriParams = this.core.urlParams(req.url || '', route.Regexp);
-            const data = this.core.paramsCheck(requestMessageInfo, route.params, res, server, {...params, ...uriParams});
+            const data = this.core.paramsCheck(requestMessageInfo, route.params, res, server, { ...params, ...uriParams });
 
             const result = await route.handler(...data);
             if (isPathValid === PathResult.ValueReturned && !error) {
