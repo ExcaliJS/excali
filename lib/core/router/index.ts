@@ -103,4 +103,34 @@ export class Router implements IRouterClass {
 
   }
 
+  public parseBody(req: RequestMessage): Promise<Record<string, unknown>> {
+    return new Promise<Record<string, unknown>>((resolve, reject) => {
+      let body: string = ''
+      let result: Record<string, unknown> = {}
+
+      req.on('data', (chunk: string) => {
+        body += chunk
+      })
+
+      req.on('end', () => {
+        try {
+          if (req.headers['content-type'] === 'application/json') {
+            result = JSON.parse(body)
+          } else {
+            result = { body }
+          }
+          resolve(result)
+        } catch (err) {
+          reject(ExcaliCustomError.BadRequest('unable to parse json body'))
+        }
+      })
+
+      req.on('error', () => {
+        reject(new Error(ExcaliError.UNABLE_TO_READ_BODY))
+      })
+    })
+
+  }
+
+ 
 }
