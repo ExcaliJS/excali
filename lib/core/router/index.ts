@@ -35,4 +35,18 @@ export class Router implements IRouterClass {
     return paramList;
   }
 
+  public pathsCheck(path: string | null, route: IRoute, method?: string): PathResult {
+    if (route.method === HttpMethods.REDIRECT) {
+      return PathResult.Redirect
+    }
+    if (route.method === HttpMethods.MIDDLEWARE || ((route.method === method || route.method === HttpMethods.USE) && route.Regexp.test(path ?? ''))) {
+      return route.method === HttpMethods.MIDDLEWARE ? PathResult.NoReturn : PathResult.ValueReturned
+    }
+
+    if (route.method === HttpMethods.STATIC && route.Regexp.test(path ?? ''))
+      return PathResult.Static
+
+    return PathResult.NotInPath
+  }
+
 }
