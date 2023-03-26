@@ -132,5 +132,50 @@ export class Router implements IRouterClass {
 
   }
 
- 
+  public regexPath(path: string, method: HttpMethods): RegExp {
+    let res = path
+    // pattern to find all the parameters
+    const regexp1 = new RegExp('(:[^/]+)', 'g')
+    let tmp
+
+    // replace all * with (.*) to match any character
+    res = res.replace(/\*/g, '(.*)')
+    // loop through all the parameters
+    while ((tmp = regexp1.exec(path)) !== null) {
+      // get the name of the parameter
+      const name = tmp[0].replace(':', '')
+      // replace the parameter with a group that matches any character except for /
+      res = res.replace(tmp[0], `(?<${name}>[^/]*)`)
+
+    }
+    // if the method is not static, add a $ to the end of the path to match the end of the string
+    if (method !== HttpMethods.STATIC) {
+      res += '$'
+    }
+
+    // return the path as a regex
+    return new RegExp('^' + res, 'i')
+  }
+  public sendResponse(res: Http.ServerResponse, code: number, body: string | boolean | Record<string, unknown> | null): void {
+    const objType = typeof body
+    if (objType === 'object' && body !== null) {
+      res.writeHead(code, { 'Content-Type': 'application/json' })
+      body = JSON.stringify(body)
+    }
+    else {
+      res.writeHead(code, { 'Content-Type': 'text/html' })
+    }
+
+
+    if (objType !== 'string' && body !== null) {
+      body = body.toString()
+    }
+
+    res.write(body, 'utf-8')
+
+    res.end()
+  }
+  public urlParams(url: string, regexp: RegExp): Record<string, string> {
+    return regexp.exec(url)?.groups ?? {};
+  }
 }
