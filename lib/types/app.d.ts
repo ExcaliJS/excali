@@ -1,4 +1,4 @@
-import * as Http from "http";
+import * as Http from 'http';
 
 export interface Iparams {
   name: string;
@@ -6,16 +6,16 @@ export interface Iparams {
 }
 
 export enum HttpMethods {
-  DELETE = "DELETE",
-  GET = "GET",
-  HEAD = "HEAD",
-  MIDDLEWARE = "MIDDLEWARE",
-  PATCH = "PATCH",
-  POST = "POST",
-  PUT = "PUT",
-  REDIRECT = "REDIRECT",
-  STATIC = "STATIC",
-  USE = "USE",
+  DELETE = 'DELETE',
+  GET = 'GET',
+  HEAD = 'HEAD',
+  MIDDLEWARE = 'MIDDLEWARE',
+  PATCH = 'PATCH',
+  POST = 'POST',
+  PUT = 'PUT',
+  REDIRECT = 'REDIRECT',
+  STATIC = 'STATIC',
+  USE = 'USE',
 }
 
 export enum PathResult {
@@ -38,20 +38,13 @@ export interface IServer {
   AddRoute: (
     route: HttpMethods,
     path: string,
-    exec: (...args: unknown[]) => unknown
+    exec: (...args: unknown[]) => unknown,
   ) => void;
   AddMiddleware: (exec: (...args: unknown[]) => unknown) => void;
   AddStatic: (path: string, exec: (...args: unknown[]) => unknown) => void;
   AddRedirect: (path: string, exec: (...args: unknown[]) => unknown) => void;
   AddUse: (path: string, exec: (...args: unknown[]) => unknown) => void;
   Start: (port: number) => void;
-  Stop: () => void;
-  GetRoutes: () => IRoute[];
-  GetMiddleware: () => IMiddleware[];
-  GetStatic: () => IRoute[];
-  GetRedirect: () => IRoute[];
-  GetUse: () => IRoute[];
-  GetServer: () => Http.Server;
 }
 
 export interface IExcaliServer extends IServer {
@@ -77,9 +70,9 @@ export interface IUrlInfo {
 }
 
 export enum ExcaliError {
-  MISSING_PARAMETER = "A parameter is missing : ",
-  UNKNOW_PARAMETER = "Unknown parameter : ",
-  UNABLE_TO_READ_BODY = "Unabled to read body",
+  MISSING_PARAMETER = 'A parameter is missing : ',
+  UNKNOW_PARAMETER = 'Unknown parameter : ',
+  UNABLE_TO_READ_BODY = 'Unabled to read body',
 }
 
 export interface IRouterClass {
@@ -90,7 +83,7 @@ export interface IRouterClass {
     expectations: Iparams[],
     res: Http.ServerResponse,
     server: IExcaliServer,
-    params?: Record<string, unknown>
+    params?: Record<string, unknown>,
   ): unknown[];
   parseUrl(url: string | undefined): IUrlInfo;
   parseBody(req: RequestMessage): Promise<Record<string, unknown>>;
@@ -99,6 +92,6 @@ export interface IRouterClass {
   sendResponse(
     res: Http.ServerResponse,
     code: number,
-    body: string | boolean | Record<string, unknown> | null
+    body: string | boolean | Record<string, unknown> | null,
   ): void;
 }
