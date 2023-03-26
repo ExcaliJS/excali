@@ -75,10 +75,24 @@ export interface IUrlInfo
     Body?: Record<string, unknown>
 }
 
+export enum ExcaliError 
+{
+    MISSING_PARAMETER = 'A parameter is missing : ',
+    UNKNOW_PARAMETER = 'Unknown parameter : ',
+    UNABLE_TO_READ_BODY = 'Unabled to read body'
+}
 
 
 
-
-
+export interface IRouterClass {
+  funcParams(func:Function,lowercase?:boolean): Iparams[]
+  pathsCheck(path: string | null, route: IRoute, method?: string): PathResult
+  paramsCheck(req: RequestMessage, expectations: Iparams[], res: Http.ServerResponse, server: IExcaliServer, params?: Record<string, unknown>): unknown[]
+  parseUrl(url: string | undefined): IUrlInfo
+  parseBody(req: RequestMessage): Promise<Record<string, unknown>>
+  regexPath(path: string, method: HttpMethods): RegExp
+  urlParams(url: string, regexp: RegExp): Record<string, string>
+  sendResponse(res: Http.ServerResponse, code: number, body : string|boolean|Record<string, unknown>|null): void
+}
 
 
