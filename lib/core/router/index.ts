@@ -85,4 +85,22 @@ export class Router implements IRouterClass {
 
   }
 
+  public parseUrl(url: string | undefined): IUrlInfo {
+    if (!url)
+      return { Route: null }
+
+    const splitted = url.split('?', 2)
+    const parametersSplitted = splitted.length > 1 ? splitted[1].split('&') : null
+    const parameters: Record<string, unknown> = {}
+    if (parametersSplitted) {
+      for (let idx = 0; idx < parametersSplitted.length; idx++) {
+        const current = parametersSplitted[idx]
+        const parameter = current.split('=', 2)
+        parameters[parameter[0].toLowerCase()] = parameter.length > 1 ? parameter[1] : null
+      }
+    }
+    return { Route: splitted[0].toLowerCase().trim(), Parameters: parameters }
+
+  }
+
 }
