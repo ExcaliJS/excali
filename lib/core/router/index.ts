@@ -49,4 +49,40 @@ export class Router implements IRouterClass {
     return PathResult.NotInPath
   }
 
+  public paramsCheck(req: RequestMessage, expectations: Iparams[], res: Http.ServerResponse, server: IExcaliServer, params?: Record<string, unknown>): unknown[] {
+    const result: unknown[] = []
+    const unset: string[] = []
+
+    const infos: Record<string, unknown> = {
+      '_req': req,
+      '_res': res,
+      '_method': req.method,
+      '_headers': req.headers,
+      '_server': server
+    }
+
+    expectations.forEach(expectation => {
+      const key = expectation.name
+      let val = params && params[key]
+
+      if (key in infos) val = infos[key]
+
+      if (val !== undefined) {
+        return result.push(val)
+      }
+
+      if (expectation.reqeired) {
+        unset.push(key)
+      }
+
+    })
+
+    if (unset.length > 0) {
+      throw ExcaliCustomError.BadRequest(`${ExcaliError.MISSING_PARAMETER}${unset.join(',')}`)
+    }
+
+    return result
+
+  }
+
 }
