@@ -2,7 +2,7 @@ import * as Http from 'http';
 
 export interface Iparams {
   name: string;
-  reqeired: string;
+  reqeired: boolean;
 }
 
 export enum HttpMethods {
@@ -18,20 +18,13 @@ export enum HttpMethods {
   USE = 'USE',
 }
 
-export interface IServer {
-  AddRoute: (route : HttpMethods, path:string, exec: (...args:unknown[])=> unknown) => void;
-  AddMiddleware: ( exec: (...args:unknown[])=> unknown) => void;
-  AddStatic: (path:string, exec: (...args:unknown[])=> unknown) => void;
-  AddRedirect: (path:string, exec: (...args:unknown[])=> unknown) => void;
-  AddUse: (path:string, exec: (...args:unknown[])=> unknown) => void;
-  Start: (port:number) => void;
-  Stop: () => void;
-  GetRoutes: () => IRoute[];
-  GetMiddleware: () => IRoute[];
-  GetStatic: () => IRoute[];
-  GetRedirect: () => IRoute[];
-  GetUse: () => IRoute[];
-  GetServer: () => Http.Server;
+
+export enum PathResult {
+    NotInPath =  -1,
+    NoReturn = 1,
+    ValueReturned = 2,
+    Redirect = 3,
+    Static = 4 
 }
 
 export interface IRoute {
@@ -42,6 +35,22 @@ export interface IRoute {
   Regexp: RegExp;
 }
 
+
+export interface IServer {
+  AddRoute: (route : HttpMethods, path:string, exec: (...args:unknown[])=> unknown) => void;
+  AddMiddleware: ( exec: (...args:unknown[])=> unknown) => void;
+  AddStatic: (path:string, exec: (...args:unknown[])=> unknown) => void;
+  AddRedirect: (path:string, exec: (...args:unknown[])=> unknown) => void;
+  AddUse: (path:string, exec: (...args:unknown[])=> unknown) => void;
+  Start: (port:number) => void;
+  Stop: () => void;
+  GetRoutes: () => IRoute[];
+  GetMiddleware: () => IMiddleware[];
+  GetStatic: () => IRoute[];
+  GetRedirect: () => IRoute[];
+  GetUse: () => IRoute[];
+  GetServer: () => Http.Server;
+}
 
 export interface IExcaliServer extends IServer  {
   coreServer: Http.Server;
@@ -59,10 +68,17 @@ export class RequestMessage extends Http.IncomingMessage {
   body?: Record<string, string>;
 }
 
-export interface IUrlInfo {
-  Route: string | null;
-  Params: Record<string, string>;
-  body: Record<string, string>;
+export interface IUrlInfo 
+{
+    Route: string | null
+    Parameters?: Record<string, unknown>
+    Body?: Record<string, unknown>
 }
+
+
+
+
+
+
 
 
