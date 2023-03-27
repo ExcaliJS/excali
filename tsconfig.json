@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "module": "ESNext",
+    "module": "commonjs",
     "moduleResolution": "Node",
     "target": "es2016",
     "esModuleInterop": true,
@@ -8,7 +8,7 @@
     "strict": true,
     "skipLibCheck": true,
     "rootDir": "./lib",
-    "outDir": "./build",
+    "outDir": "./dist",
     "experimentalDecorators": true
   },
   "ts-node": {

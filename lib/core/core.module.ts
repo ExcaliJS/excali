@@ -8,24 +8,24 @@ import {
   IUrlInfo,
   PathResult,
   RequestMessage,
-} from "../types/app";
+} from '../ts/app';
 
-import * as Http from "http";
-import { ExcaliCustomError } from "../error/handle";
+import * as Http from 'http';
+import { ExcaliCustomError } from '../error/handle';
 
 export class Core implements IRouterClass {
   public funcParams(func: Function, lowercase = false): Iparams[] {
     const funcString = func.toString();
     const paramsString = funcString
-      .slice(funcString.indexOf("(") + 1, funcString.indexOf(")"))
+      .slice(funcString.indexOf('(') + 1, funcString.indexOf(')'))
       .trim();
 
     const paramList: Iparams[] = [];
 
-    paramsString.split(",").forEach((param) => {
-      const [name, defaultValue] = param.trim().split("=");
+    paramsString.split(',').forEach(param => {
+      const [name, defaultValue] = param.trim().split('=');
       const paramName = lowercase ? name.toLowerCase() : name;
-      const required = typeof defaultValue === "undefined";
+      const required = typeof defaultValue === 'undefined';
 
       paramList.push({ name: paramName, reqeired: required });
     });
@@ -36,7 +36,7 @@ export class Core implements IRouterClass {
   public pathsCheck(
     path: string | null,
     route: IRoute,
-    method?: string
+    method?: string,
   ): PathResult {
     if (route.method === HttpMethods.REDIRECT) {
       return PathResult.Redirect;
@@ -44,14 +44,14 @@ export class Core implements IRouterClass {
     if (
       route.method === HttpMethods.MIDDLEWARE ||
       ((route.method === method || route.method === HttpMethods.USE) &&
-        route.Regexp.test(path ?? ""))
+        route.Regexp.test(path ?? ''))
     ) {
       return route.method === HttpMethods.MIDDLEWARE
         ? PathResult.NoReturn
         : PathResult.ValueReturned;
     }
 
-    if (route.method === HttpMethods.STATIC && route.Regexp.test(path ?? ""))
+    if (route.method === HttpMethods.STATIC && route.Regexp.test(path ?? ''))
       return PathResult.Static;
 
     return PathResult.NotInPath;
@@ -62,7 +62,7 @@ export class Core implements IRouterClass {
     expectations: Iparams[],
     res: Http.ServerResponse,
     server: IExcaliServer,
-    params?: Record<string, unknown>
+    params?: Record<string, unknown>,
   ): unknown[] {
     const result: unknown[] = [];
     const unset: string[] = [];
@@ -75,7 +75,7 @@ export class Core implements IRouterClass {
       _server: server,
     };
 
-    expectations.forEach((expectation) => {
+    expectations.forEach(expectation => {
       const key = expectation.name;
       let val = params && params[key];
 
@@ -92,7 +92,7 @@ export class Core implements IRouterClass {
 
     if (unset.length > 0) {
       throw ExcaliCustomError.BadRequest(
-        `${ExcaliError.MISSING_PARAMETER}${unset.join(",")}`
+        `${ExcaliError.MISSING_PARAMETER}${unset.join(',')}`,
       );
     }
 
@@ -102,14 +102,14 @@ export class Core implements IRouterClass {
   public parseUrl(url: string | undefined): IUrlInfo {
     if (!url) return { Route: null };
 
-    const splitted = url.split("?", 2);
+    const splitted = url.split('?', 2);
     const parametersSplitted =
-      splitted.length > 1 ? splitted[1].split("&") : null;
+      splitted.length > 1 ? splitted[1].split('&') : null;
     const parameters: Record<string, unknown> = {};
     if (parametersSplitted) {
       for (let idx = 0; idx < parametersSplitted.length; idx++) {
         const current = parametersSplitted[idx];
-        const parameter = current.split("=", 2);
+        const parameter = current.split('=', 2);
         parameters[parameter[0].toLowerCase()] =
           parameter.length > 1 ? parameter[1] : null;
       }
@@ -119,27 +119,27 @@ export class Core implements IRouterClass {
 
   public parseBody(req: RequestMessage): Promise<Record<string, unknown>> {
     return new Promise<Record<string, unknown>>((resolve, reject) => {
-      let body: string = "";
+      let body: string = '';
       let result: Record<string, unknown> = {};
 
-      req.on("data", (chunk: string) => {
+      req.on('data', (chunk: string) => {
         body += chunk;
       });
 
-      req.on("end", () => {
+      req.on('end', () => {
         try {
-          if (req.headers["content-type"] === "application/json") {
+          if (req.headers['content-type'] === 'application/json') {
             result = JSON.parse(body);
           } else {
             result = { body };
           }
           resolve(result);
         } catch (err) {
-          reject(ExcaliCustomError.BadRequest("unable to parse json body"));
+          reject(ExcaliCustomError.BadRequest('unable to parse json body'));
         }
       });
 
-      req.on("error", () => {
+      req.on('error', () => {
         reject(new Error(ExcaliError.UNABLE_TO_READ_BODY));
       });
     });
@@ -148,44 +148,44 @@ export class Core implements IRouterClass {
   public regexPath(path: string, method: HttpMethods): RegExp {
     let res = path;
     // pattern to find all the parameters
-    const regexp1 = new RegExp("(:[^/]+)", "g");
+    const regexp1 = new RegExp('(:[^/]+)', 'g');
     let tmp;
 
     // replace all * with (.*) to match any character
-    res = res.replace(/\*/g, "(.*)");
+    res = res.replace(/\*/g, '(.*)');
     // loop through all the parameters
     while ((tmp = regexp1.exec(path)) !== null) {
       // get the name of the parameter
-      const name = tmp[0].replace(":", "");
+      const name = tmp[0].replace(':', '');
       // replace the parameter with a group that matches any character except for /
       res = res.replace(tmp[0], `(?<${name}>[^/]*)`);
     }
     // if the method is not static, add a $ to the end of the path to match the end of the string
     if (method !== HttpMethods.STATIC) {
-      res += "$";
+      res += '$';
     }
 
     // return the path as a regex
-    return new RegExp("^" + res, "i");
+    return new RegExp('^' + res, 'i');
   }
   public sendResponse(
     res: Http.ServerResponse,
     code: number,
-    body: string | boolean | Record<string, unknown> | null
+    body: string | boolean | Record<string, unknown> | null,
   ): void {
     const objType = typeof body;
-    if (objType === "object" && body !== null) {
-      res.writeHead(code, { "Content-Type": "application/json" });
+    if (objType === 'object' && body !== null) {
+      res.writeHead(code, { 'Content-Type': 'application/json' });
       body = JSON.stringify(body);
     } else {
-      res.writeHead(code, { "Content-Type": "text/html" });
+      res.writeHead(code, { 'Content-Type': 'text/html' });
     }
 
-    if (objType !== "string" && body !== null) {
+    if (objType !== 'string' && body !== null) {
       body = body.toString();
     }
 
-    res.write(body, "utf-8");
+    res.write(body, 'utf-8');
 
     res.end();
   }

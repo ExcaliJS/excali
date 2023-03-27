@@ -50,7 +50,7 @@ export interface IServer {
 export interface IExcaliServer extends IServer {
   coreServer: Http.Server;
   routes: IRoute[];
-  defaltError?: () => void;
+  DefaultError?: { code: number; message: string };
 }
 
 export interface IExcaliServerOptions {

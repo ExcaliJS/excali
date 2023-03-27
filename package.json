@@ -2,10 +2,8 @@
   "name": "excali",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
-  "type": "module",
   "scripts": {
-    "start": "ts-node ./lib/core/app.ts",
+    "start": "ts-node ./lib/app/main.ts",
     "lint": "eslint . --ext .ts",
     "prepare": "husky install"
   },
@@ -19,8 +17,28 @@
     "*.ts": "eslint --cache --fix",
     "*.{js,css,md}": "prettier --write"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "excali",
+    "typescript",
+    "nodejs",
+    "express",
+    "excalijs",
+    "nestjs",
+    "deno",
+    "http",
+    "web",
+    "framework",
+    "fast",
+    "api",
+    "rest",
+    "graphql",
+    "gql",
+    "apollo",
+    "server",
+    "microservice",
+    "microse"
+  ],
+  "author": "recepkefeli",
   "license": "ISC",
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^5.56.0",

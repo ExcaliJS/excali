@@ -1,23 +1,26 @@
-import * as http from "http";
+import * as http from 'http';
 import {
   HttpMethods,
   IExcaliServer,
   PathResult,
   RequestMessage,
-} from "../types/app";
-import { Core } from "../core";
-import { ExcaliCustomError } from "../error/handle";
-import { manageError } from "../error/manage";
+} from '../ts/app';
+import { Core } from '../core/core.module';
+import { ExcaliCustomError } from '../error/handle';
+import { manageError } from '../error/manage';
 
 export class RequestParser {
   private servers: Record<number, IExcaliServer> = {};
+  core: Core;
 
-  constructor(private core: Core) {}
+  constructor(core: Core) {
+    this.core = core;
+  }
 
   public async parser(
     port: number,
     req: http.IncomingMessage,
-    res: http.ServerResponse
+    res: http.ServerResponse,
   ): Promise<void> {
     const server = this.servers[port];
     const urlInfo = this.core.parseUrl(req.url);
@@ -39,7 +42,7 @@ export class RequestParser {
         const isPathValid: PathResult = this.core.pathsCheck(
           urlInfo.Route,
           route,
-          req.method
+          req.method,
         );
 
         if (isPathValid === PathResult.Redirect) {
@@ -53,13 +56,13 @@ export class RequestParser {
               requestMessageInfo.method === HttpMethods.GET
                 ? urlInfo.Parameters
                 : urlInfo.Body;
-            const uriParams = this.core.urlParams(req.url || "", route.Regexp);
+            const uriParams = this.core.urlParams(req.url || '', route.Regexp);
             const data = this.core.paramsCheck(
               requestMessageInfo,
               route.params,
               res,
               server,
-              { ...params, ...uriParams }
+              { ...params, ...uriParams },
             );
 
             const result = await route.handler(...data);
@@ -73,14 +76,14 @@ export class RequestParser {
               this.core.sendResponse(
                 res,
                 statusCode,
-                result as string | Record<string, unknown>
+                result as string | Record<string, unknown>,
               );
             }
           } catch (err) {
-            if (error instanceof ExcaliCustomError || !server.defaltError) {
+            if (error instanceof ExcaliCustomError || !server.DefaultError) {
               error = err;
             } else {
-              error = server.defaltError;
+              error = server.DefaultError;
             }
           } finally {
             executed = isPathValid === PathResult.ValueReturned;
@@ -92,7 +95,7 @@ export class RequestParser {
     }
 
     if (!executed) {
-      return this.core.sendResponse(res, 404, "not found");
+      return this.core.sendResponse(res, 404, 'not found');
     }
 
     if (error) {
