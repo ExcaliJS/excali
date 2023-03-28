@@ -4,7 +4,7 @@ import {
   IExcaliServer,
   PathResult,
   RequestMessage,
-} from '../ts/app';
+} from '../type/core.type';
 import { Core } from '../core/core.module';
 import { ExcaliCustomError } from '../error/handle';
 import { manageError } from '../error/manage';
@@ -46,7 +46,7 @@ export class RequestParser {
         );
 
         if (isPathValid === PathResult.Redirect) {
-          await route.handler(req, res);
+          await route.Exec(req, res);
           return;
         }
 
@@ -59,13 +59,13 @@ export class RequestParser {
             const uriParams = this.core.urlParams(req.url || '', route.Regexp);
             const data = this.core.paramsCheck(
               requestMessageInfo,
-              route.params,
+              route.Params,
               res,
               server,
               { ...params, ...uriParams },
             );
 
-            const result = await route.handler(...data);
+            const result = await route.Exec(...data);
             if (isPathValid === PathResult.ValueReturned && !error) {
               if (!result) {
                 this.core.sendResponse(res, 204, null);

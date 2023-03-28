@@ -8,7 +8,7 @@ import {
   IUrlInfo,
   PathResult,
   RequestMessage,
-} from '../ts/app';
+} from '../type/core.type';
 
 import * as Http from 'http';
 import { ExcaliCustomError } from '../error/handle';
@@ -38,20 +38,20 @@ export class Core implements IRouterClass {
     route: IRoute,
     method?: string,
   ): PathResult {
-    if (route.method === HttpMethods.REDIRECT) {
+    if (route.Method === HttpMethods.REDIRECT) {
       return PathResult.Redirect;
     }
     if (
-      route.method === HttpMethods.MIDDLEWARE ||
-      ((route.method === method || route.method === HttpMethods.USE) &&
+      route.Method === HttpMethods.MIDDLEWARE ||
+      ((route.Method === method || route.Method === HttpMethods.USE) &&
         route.Regexp.test(path ?? ''))
     ) {
-      return route.method === HttpMethods.MIDDLEWARE
+      return route.Method === HttpMethods.MIDDLEWARE
         ? PathResult.NoReturn
         : PathResult.ValueReturned;
     }
 
-    if (route.method === HttpMethods.STATIC && route.Regexp.test(path ?? ''))
+    if (route.Method === HttpMethods.STATIC && route.Regexp.test(path ?? ''))
       return PathResult.Static;
 
     return PathResult.NotInPath;

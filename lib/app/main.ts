@@ -9,8 +9,8 @@ import {
   IExcaliServer,
   IRoute,
   IExcaliServerOptions,
-} from '../ts/app';
-import { getServer, setServer } from '../utils';
+} from '../type/core.type';
+import { getServer, setServer } from '../utils/utils';
 import { ExcaliCustomError } from '../error/handle';
 
 const core = new Core();

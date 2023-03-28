@@ -1,4 +1,4 @@
-import { IExcaliServer } from './ts/app';
+import { IExcaliServer } from '../type/core.type';
 
 const servers: Record<number, IExcaliServer> = {};
 

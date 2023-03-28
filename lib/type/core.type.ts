@@ -27,24 +27,20 @@ export enum PathResult {
 }
 
 export interface IRoute {
-  method: HttpMethods;
-  path: string;
-  handler: Function;
-  params: Iparams[];
+  Path: string;
+  Exec: (...args: unknown[]) => unknown;
+  Method: HttpMethods;
   Regexp: RegExp;
+  Params: Iparams[];
 }
 
 export interface IServer {
-  AddRoute: (
+  Route: (
     route: HttpMethods,
     path: string,
     exec: (...args: unknown[]) => unknown,
   ) => void;
   AddMiddleware: (exec: (...args: unknown[]) => unknown) => void;
-  AddStatic: (path: string, exec: (...args: unknown[]) => unknown) => void;
-  AddRedirect: (path: string, exec: (...args: unknown[]) => unknown) => void;
-  AddUse: (path: string, exec: (...args: unknown[]) => unknown) => void;
-  Start: (port: number) => void;
 }
 
 export interface IExcaliServer extends IServer {
