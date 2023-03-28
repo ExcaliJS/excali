@@ -1,58 +1,132 @@
-import { IExcaliServerOptions } from '../ts/app';
 import * as Http from 'http';
 import * as Https from 'https';
+import * as Url from 'url';
 import * as Fs from 'fs';
 import { RequestParser } from '../parser/request.parser';
 import { Core } from '../core/core.module';
-import { getServer } from '../utils';
-
-export class Excali {
-  public defaultPort = 8000;
-  requestParser: RequestParser;
-
-  constructor(requestParser: RequestParser) {
-    this.requestParser = requestParser;
-  }
-
-  public excaliServerOptions(options: IExcaliServerOptions) {
-    const result: Https.ServerOptions = {};
-    if (options.https) {
-      result.cert = Fs.readFileSync(options.https.cert);
-      result.key = Fs.readFileSync(options.https.key);
-    }
-    return result;
-  }
-
-  public excaliServer(port: number, options: IExcaliServerOptions = {}) {
-    if (port === 0) {
-      port = this.defaultPort;
-    }
-
-    const existingServer = getServer(port);
-    if (existingServer) {
-      return existingServer;
-    }
-
-    // const httpModule = Http;
-    const server = Http.createServer(
-      this.excaliServerOptions(options),
-      async (request: Http.IncomingMessage, response: Http.ServerResponse) => {
-        if (request.url == '/merhaaba') {
-          response.writeHead(200, { 'Content-Type': 'text/plain' });
-          response.write('Hello World');
-          response.end();
-          return;
-        }
-        await this.requestParser.parser(port, request, response);
-      },
-    ).listen(port, () => {
-      console.log(`Excali server is running on port ${port}`);
-    });
-    return server;
-  }
-}
+import {
+  HttpMethods,
+  IExcaliServer,
+  IRoute,
+  IExcaliServerOptions,
+} from '../ts/app';
+import { getServer, setServer } from '../utils';
+import { ExcaliCustomError } from '../error/handle';
 
 const core = new Core();
-const requestParser = new RequestParser(core);
-const excali = new Excali(requestParser);
-excali.excaliServer(3000);
+const parseRequest = new RequestParser(core);
+let MainPort = 8000;
+
+const generateServerOptions = (
+  options: IExcaliServerOptions,
+): Https.ServerOptions => {
+  const result: Https.ServerOptions = {};
+  if (options.https) {
+    result.cert = Fs.readFileSync(options.https.cert);
+    result.key = Fs.readFileSync(options.https.key);
+  }
+  return result;
+};
+
+const pathToFunction = (
+  port: number,
+  req: Http.IncomingMessage,
+  res: Http.ServerResponse,
+) => {
+  const newServer = getServer(port);
+  const matchingRoute = newServer.routes.find(route => route.Path === req.url);
+  if (matchingRoute) {
+    const result = matchingRoute.Exec();
+    res.end(result);
+  }
+};
+export const excaliServer = (
+  port = 8000,
+  options: IExcaliServerOptions = {},
+): IExcaliServer => {
+  if (port === 0) {
+    port = MainPort;
+  }
+
+  let server = getServer(port);
+  if (server) {
+    return server;
+  }
+
+  const excaliServers = options.https
+    ? Https.createServer(
+        generateServerOptions(options),
+        async (req: Http.IncomingMessage, res: Http.ServerResponse) => {
+          pathToFunction(port, req, res);
+          await parseRequest.parser(port, req, res);
+        },
+      )
+    : Http.createServer(
+        async (req: Http.IncomingMessage, res: Http.ServerResponse) => {
+          pathToFunction(port, req, res);
+          await parseRequest.parser(port, req, res);
+        },
+      );
+
+  const excaServer: IExcaliServer = {
+    coreServer: excaliServers,
+    routes: [
+      {
+        Method: HttpMethods.GET,
+        Exec: () => 'hello world',
+        Path: '/',
+        Regexp: core.regexPath('/test', HttpMethods.GET),
+        Params: core.funcParams(() => 'hello world'),
+      },
+    ],
+    Route: (
+      type: HttpMethods,
+      path: string,
+      exec: (...args: unknown[]) => unknown,
+    ) => Route(type, path, exec, server),
+    AddMiddleware: (exec: (...args: unknown[]) => unknown) =>
+      AddMiddleware(exec, server),
+    DefaultError: options.error,
+  };
+
+  setServer(port, excaServer);
+
+  excaliServers.listen(port);
+
+  return excaServer;
+};
+
+export const SetMainPort = (port: number): void => {
+  MainPort = port;
+};
+
+export const Route = (
+  type: HttpMethods,
+  path: string,
+  exec: (...args: any[]) => unknown,
+  portOrServer: number | IExcaliServer = 8000,
+): void => {
+  const truePath = path.trim().toLowerCase();
+  const server =
+    typeof portOrServer === 'object' ? portOrServer : getServer(portOrServer);
+  if (!server) {
+    throw ExcaliCustomError.ServerError(
+      `Server with port ${portOrServer} not found.`,
+    );
+  }
+  const route: IRoute = {
+    Method: type,
+    Exec: exec,
+    Path: truePath,
+    Regexp: core.regexPath(truePath, type),
+    Params: core.funcParams(exec),
+  };
+  server.routes.push(route);
+};
+
+export const AddMiddleware = (
+  exec: (...args: any[]) => unknown,
+  portOrServer: number | IExcaliServer = 0,
+): void => {
+  Route(HttpMethods.MIDDLEWARE, '', exec, portOrServer);
+};
