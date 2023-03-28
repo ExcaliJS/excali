@@ -12,3 +12,7 @@ Route(HttpMethods.GET, '/test', (req: http.IncomingMessage) => {
 Route(HttpMethods.GET, '/deneme', (req, res) => {
   return 'goodby world';
 });
+
+Route(HttpMethods.GET, '/error', (req, res) => {
+  throw ExcaliCustomError.NotFound('not found');
+});
